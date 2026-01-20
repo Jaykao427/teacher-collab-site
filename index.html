@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>教師共備社群</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input { margin-bottom: 10px; padding: 5px; width: 250px; }
+    button { padding: 5px 10px; margin-right: 5px; }
+    #content-section { margin-top: 20px; }
+  </style>
 </head>
 <body>
   <h1>教師共備社群</h1>
 
   <div id="auth-section">
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="password" placeholder="密碼"><br><br>
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="密碼"><br>
     <button id="signup">註冊</button>
     <button id="login">登入</button>
   </div>
@@ -17,54 +23,58 @@
   <div id="content-section" style="display:none;">
     <p id="welcome"></p>
     <button id="logout">登出</button>
-    <div id="content"></div>
+    <hr>
+    <div id="content">
+      <p>登入後，你可以開始使用教師共備社群功能！</p>
+    </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = supabase.createClient(
-      "你的 Supabase Project URL",
-      "你的 anon public key"
-    )
+    // ====== 替換成你的 Supabase 連線資訊 ======
+    const SUPABASE_URL = "https://fwirjrojazaqbuenfhjr.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3aXJqcm9qYXphcWJ1ZW5maGpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4OTY1NjEsImV4cCI6MjA4NDQ3MjU2MX0.IV1tTHFkM8QR3QGqpsJ_Eur5KQux57A7w7UZWsikBoA";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // =========================================
 
-    const authSection = document.getElementById("auth-section")
-    const contentSection = document.getElementById("content-section")
-    const welcome = document.getElementById("welcome")
+    const authSection = document.getElementById("auth-section");
+    const contentSection = document.getElementById("content-section");
+    const welcome = document.getElementById("welcome");
 
     async function checkUser() {
-      const { data } = await supabase.auth.getUser()
-      if(data.user){
-        authSection.style.display = "none"
-        contentSection.style.display = "block"
-        welcome.innerText = "歡迎, " + (data.user.email || "")
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        authSection.style.display = "none";
+        contentSection.style.display = "block";
+        welcome.innerText = "歡迎, " + (data.user.email || "");
       } else {
-        authSection.style.display = "block"
-        contentSection.style.display = "none"
+        authSection.style.display = "block";
+        contentSection.style.display = "none";
       }
     }
 
     document.getElementById("signup").onclick = async () => {
-      const email = document.getElementById("email").value
-      const password = document.getElementById("password").value
-      const { error } = await supabase.auth.signUp({ email, password })
-      if(error) alert("註冊失敗: " + error.message)
-      else alert("註冊成功，請登入")
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) alert("註冊失敗: " + error.message);
+      else alert("註冊成功！請登入");
     }
 
     document.getElementById("login").onclick = async () => {
-      const email = document.getElementById("email").value
-      const password = document.getElementById("password").value
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if(error) alert("登入失敗: " + error.message)
-      checkUser()
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert("登入失敗: " + error.message);
+      checkUser();
     }
 
     document.getElementById("logout").onclick = async () => {
-      await supabase.auth.signOut()
-      checkUser()
+      await supabase.auth.signOut();
+      checkUser();
     }
 
-    checkUser()
+    checkUser();
   </script>
 </body>
 </html>
