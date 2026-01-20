@@ -1,44 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>教師共備社群</title>
 </head>
 <body>
   <h1>教師共備社群</h1>
 
-  <button id="login">登入</button>
-  <button id="logout">登出</button>
+  <div id="auth-section">
+    <input type="email" id="email" placeholder="Email"><br><br>
+    <input type="password" id="password" placeholder="密碼"><br><br>
+    <button id="signup">註冊</button>
+    <button id="login">登入</button>
+  </div>
 
-  <div id="content"></div>
+  <div id="content-section" style="display:none;">
+    <p id="welcome"></p>
+    <button id="logout">登出</button>
+    <div id="content"></div>
+  </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      "你的 Project URL",
-      "你的 anon key"
+    const supabase = supabase.createClient(
+      "你的 Supabase Project URL",
+      "你的 anon public key"
     )
 
-    async function checkLogin() {
+    const authSection = document.getElementById("auth-section")
+    const contentSection = document.getElementById("content-section")
+    const welcome = document.getElementById("welcome")
+
+    async function checkUser() {
       const { data } = await supabase.auth.getUser()
-      document.getElementById("content").innerText =
-        data.user ? "已登入，可以進共備區" : "尚未登入"
+      if(data.user){
+        authSection.style.display = "none"
+        contentSection.style.display = "block"
+        welcome.innerText = "歡迎, " + (data.user.email || "")
+      } else {
+        authSection.style.display = "block"
+        contentSection.style.display = "none"
+      }
+    }
+
+    document.getElementById("signup").onclick = async () => {
+      const email = document.getElementById("email").value
+      const password = document.getElementById("password").value
+      const { error } = await supabase.auth.signUp({ email, password })
+      if(error) alert("註冊失敗: " + error.message)
+      else alert("註冊成功，請登入")
     }
 
     document.getElementById("login").onclick = async () => {
-      await supabase.auth.signInWithPassword({
-        email: prompt("Email"),
-        password: prompt("Password")
-      })
-      checkLogin()
+      const email = document.getElementById("email").value
+      const password = document.getElementById("password").value
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if(error) alert("登入失敗: " + error.message)
+      checkUser()
     }
 
     document.getElementById("logout").onclick = async () => {
       await supabase.auth.signOut()
-      checkLogin()
+      checkUser()
     }
 
-    checkLogin()
+    checkUser()
   </script>
 </body>
 </html>
